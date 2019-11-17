@@ -2,7 +2,7 @@
 theme: jekyll-theme-slate
 title: Docker Exercises
 description: Introduction to Docker
-baseurl: /docker
+permalink: /docker/
 ---
 # Docker training exercises
 
