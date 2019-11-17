@@ -4,6 +4,6 @@ An online brain dump of various tech knowlegde.
 
 ## Catagories
 
-* Docker/Containers
+* [Docker/Containers](./docker)
 * Kubernetes
-* Other
+* [Other](./other)
