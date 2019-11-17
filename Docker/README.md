@@ -1,3 +1,8 @@
+theme: jekyll-theme-slate
+title: Docker Exercises
+description: Introduction to Docker
+baseurl: /docker
+
 # Docker training exercises
 
 1. [Hello World](./hello-world)
