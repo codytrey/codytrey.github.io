@@ -4,3 +4,11 @@ description: "An online brain dump"
 permalink: "/:title"
 url: https://codytrey.github.io
 relative_permalinks: true
+future: true
+excerpt_separator: '---'
+collections:
+  other: {output: true, permalink: '/other/:path/'}
+include:
+  - other
+  - kubernetes
+  - docker
