@@ -21,4 +21,4 @@ Previous: [Hello World](../hello-world) Next: [Building Custom Containers](../no
 
 ## Refs
 
-* [https://hub.docker.com/_/nginx](https://hub.docker.com/_/nginx)
+* [https://hub.docker.com/\_/nginx](https://hub.docker.com/\_/nginx)
