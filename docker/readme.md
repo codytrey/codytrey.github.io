@@ -1,7 +1,6 @@
 ---
-theme: jekyll-theme-slate
+layout: page
 title: Docker Exercises
-description: Introduction to Docker
 permalink: /docker/
 ---
 # Docker training exercises

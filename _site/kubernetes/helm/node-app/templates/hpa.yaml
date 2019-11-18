@@ -1,0 +1,22 @@
+{{- if .Values.hpa.enabled -}}
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "node-app.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "node-app.name" . }}
+    helm.sh/chart: {{ include "node-app.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "node-app.fullname" . }}
+  minReplicas: {{ .Values.hpa.min }}
+  maxReplicas: {{ .Values.hpa.max }}
+  {{- with .Values.hpa.metrics }}
+  metrics:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

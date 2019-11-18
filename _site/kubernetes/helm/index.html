@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Manage Kubernetes Deployments using Helm | codytrey.github.io</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Manage Kubernetes Deployments using Helm" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<meta property="og:description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<link rel="canonical" href="http://localhost:4000/kubernetes/helm/" />
+<meta property="og:url" content="http://localhost:4000/kubernetes/helm/" />
+<meta property="og:site_name" content="codytrey.github.io" />
+<script type="application/ld+json">
+{"@type":"WebPage","headline":"Manage Kubernetes Deployments using Helm","url":"http://localhost:4000/kubernetes/helm/","description":"codytrey.github.io is an online brain dump for various tech knowledge","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="codytrey.github.io" /></head>
+<body><header class="site-header" role="banner">
+
+    <div class="wrapper"><a class="site-title" rel="author" href="/">codytrey.github.io</a>
+      </div>
+  </header>
+  <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <div class="post-content">
+    <h1 id="manage-kubernetes-deployments-using-helm">Manage Kubernetes Deployments using Helm</h1>
+
+<p>Now that you’re familure with k8s concepts and resouces, you should learn about some tools that make it easier to manage deploying applications into k8s in a repeatable manner.</p>
+
+<p>Helm describes itself as:</p>
+
+<blockquote>
+  <p>The package manager for Kubernetes</p>
+</blockquote>
+
+<p><a href="https://helm.sh/docs/">https://helm.sh/docs/</a></p>
+
+<p>Helm has a concept of a <code class="language-plaintext highlighter-rouge">chart</code>. A chart is esentially a collection of templated yaml files that define all of the resources nessisary to deploy an application into k8s. These files are then processes through a templating engine where the supplied values (see <a href="./node-app/templates/values.yaml">values.yaml</a> for default values) are inserted into the templates.</p>
+
+<p>This creates values yaml files that Helm deploys into Kubernetes for you.</p>
+
+<p><strong>Note</strong> if you haven’t yet deleted the manually deployed resources, do so now by running:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl delete <span class="nt">-f</span> ~/container_training/k8s/hpa/node-app-hpa.yaml
+kubectl delete <span class="nt">-f</span> ~/container_training/k8s/hpa/node-deploy-v3.yaml
+kubectl delete <span class="nt">-f</span> ~/container_training/k8s/service/node-svc.yaml
+</code></pre></div></div>
+
+<p>For this example we have created a sample chart that is able to reproduce the deployment we previous step by step.</p>
+
+<p>Lets see what the generated yaml looks like if we pass no additional files:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>helm <span class="nb">install</span> ./node-app <span class="nt">--dry-run</span> <span class="nt">--debug</span>
+</code></pre></div></div>
+
+<p>The section under <code class="language-plaintext highlighter-rouge">COMPUTED VALUES</code> is all of the values that are being passed to the templating engine. As we haven’t passed any non-default values, these will be all default values.</p>
+
+<p>As you look under the <code class="language-plaintext highlighter-rouge">MANIFEST</code> section, you’ll notice a few key differences between the generated yaml and our yaml from before:</p>
+
+<ul>
+  <li>There are additional labels we didn’t have
+    <ul>
+      <li>These are used for helm’s internal version tracking of <code class="language-plaintext highlighter-rouge">releases</code></li>
+    </ul>
+  </li>
+  <li>The <code class="language-plaintext highlighter-rouge">metadata.name</code> value is different.
+    <ul>
+      <li>This is because helm autogenerates a name in the form adjective-noun-chart-name unless the <code class="language-plaintext highlighter-rouge">-n</code> or <code class="language-plaintext highlighter-rouge">--name</code> flag is provided</li>
+    </ul>
+  </li>
+  <li>The service yaml was generated with spec.type=ClusterIP instead of NodePort
+    <ul>
+      <li>The default service type in a new helm chart is ClusterIP, which is fairly standard, however this can be changed in the template if the application deployed by the chart should default to a different type of service</li>
+    </ul>
+  </li>
+  <li>There is no hpa yaml generated
+    <ul>
+      <li>this is because we did not set the value hpa.enabled to true (the default is false)</li>
+      <li>the templating engine allows complex if/if else logic as well as loops to control when and how yaml is generated.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Let’s set the options needed to replica our current deployed app.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>helm <span class="nb">install</span> ./node-app <span class="nt">--name</span> node-app <span class="nt">--dry-run</span> <span class="nt">--debug</span> <span class="nt">--set</span> service.type<span class="o">=</span>NodePort,service.port<span class="o">=</span>3000,hpa.enabled<span class="o">=</span><span class="nb">true</span>,hpa.metrics.type<span class="o">=</span>Resource,hpa.metrics.resource.name<span class="o">=</span>cpu,hpa.metrics.resource.target.type<span class="o">=</span>Utilization,hpa.metrics.resource.target.averageUtilization<span class="o">=</span>50,api.secretName<span class="o">=</span>node-api-secret,api.secretKey<span class="o">=</span>API_KEY
+</code></pre></div></div>
+
+<p><strong>Wow!</strong> That command is gross, if you’re wondering if there is a better way, you’re in luck.</p>
+
+<h2 id="option-15">Option 1.5</h2>
+
+<p>Using a values file when running helm install. With this option, each of the setting specified in the <code class="language-plaintext highlighter-rouge">--set</code> flag can be put in a yaml file that is then passed with a <code class="language-plaintext highlighter-rouge">-f</code> to <code class="language-plaintext highlighter-rouge">helm install</code></p>
+
+<p>Using the <a href="/kubernetes/helm/values.yaml">values.yaml</a> the following command is equivilent to previous gross command</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>helm <span class="nb">install</span> ./node-app <span class="nt">--name</span> node-app <span class="nt">--dry-run</span> <span class="nt">--debug</span> <span class="nt">-f</span> values.yaml
+</code></pre></div></div>
+
+<h2 id="option-2">Option 2</h2>
+
+<p>A utility that is complementary to Helm is <code class="language-plaintext highlighter-rouge">Helmfile</code>. Helmfile is described as:</p>
+
+<blockquote>
+  <p>Helm for your Helm</p>
+</blockquote>
+
+<p>With helmfile, you write a <a href="/kubernetes/helm/helmfile.yaml">helmfile.yaml</a> that describes the release you want helm to create. This includes the release name, namespace, source chart, and any values to supply to helm.</p>
+
+<p>Running the following command, from the directory that contains helmfile.yaml, is equivilent to the previous <code class="language-plaintext highlighter-rouge">helm install</code> comamnd:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helmfile <span class="nb">sync</span>
+</code></pre></div></div>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">codytrey.github.io</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">codytrey.github.io</li><li><a class="u-email" href="mailto:cody.t.belcher@gmail.com">cody.t.belcher@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>codytrey.github.io is an online brain dump for various tech knowledge</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

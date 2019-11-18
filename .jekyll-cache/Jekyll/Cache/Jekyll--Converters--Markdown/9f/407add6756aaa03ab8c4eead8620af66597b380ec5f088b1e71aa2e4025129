@@ -1,0 +1,21 @@
+I"¿<h1 id="babys-first-container">Babyâ€™s first Container</h1>
+
+<p>First take a look at your Docker environment:
+To see the images downloaded to you system run:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    ~<span class="nv">$ </span>docker images <span class="o">(</span>There should be none<span class="o">)</span>
+</code></pre></div></div>
+
+<p>Very minimal example of a Docker container:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    ~<span class="nv">$ </span>docker run hello-world
+</code></pre></div></div>
+
+<p>Now run the <code class="highlighter-rouge">docker images</code> command again, you should see that it automatically downloaded the necessary image.</p>
+
+<p>Next: <a href="../nginx">Nginx Web Server</a></p>
+
+<h2 id="refs">Refs</h2>
+
+<p>[https://hub.docker.com/<em>/hello-world](https://hub.docker.com/</em>/hello-world)</p>
+:ET

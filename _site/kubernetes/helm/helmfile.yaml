@@ -1,0 +1,20 @@
+releases:
+  - name: node-app
+    namespace: default
+    chart: ./node-app
+    values:
+      - service:
+          type: NodePort
+          port: 3000
+        hpa:
+          enabled: true
+          metrics:
+          - type: Resource
+            resource:
+              name: cpu
+              target:
+                type: Utilization
+                averageUtilization: 50
+        api:
+          secretName: node-api-secret
+          secretKey: API_KEY

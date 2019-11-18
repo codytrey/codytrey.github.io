@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Using k8s Deployments | codytrey.github.io</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Using k8s Deployments" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<meta property="og:description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<link rel="canonical" href="http://localhost:4000/kubernetes/deployment/" />
+<meta property="og:url" content="http://localhost:4000/kubernetes/deployment/" />
+<meta property="og:site_name" content="codytrey.github.io" />
+<script type="application/ld+json">
+{"@type":"WebPage","headline":"Using k8s Deployments","url":"http://localhost:4000/kubernetes/deployment/","description":"codytrey.github.io is an online brain dump for various tech knowledge","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="codytrey.github.io" /></head>
+<body><header class="site-header" role="banner">
+
+    <div class="wrapper"><a class="site-title" rel="author" href="/">codytrey.github.io</a>
+      </div>
+  </header>
+  <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <div class="post-content">
+    <h1 id="using-k8s-deployments">Using k8s Deployments</h1>
+
+<p>Great, the App is running and exposed. Time to call it a day right?</p>
+
+<p>Consider what happens if we need to do any of the following:</p>
+
+<ul>
+  <li>Update the application with:
+    <ul>
+      <li>a new container image</li>
+      <li>a new API key</li>
+    </ul>
+  </li>
+  <li>Change any k8s related settings</li>
+</ul>
+
+<p>Would it be seemless to the end users?</p>
+
+<p>No, the pod would have to be deleted before the new and updated version can deployed. Thus, creating downtime.</p>
+
+<p>However, by using the deployment resouce type in k8s, when a change is made to the child pod, k8s knows to keep the old version running until the new version has become avaliable.</p>
+
+<p>First, delete the pod from earlier:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl delete pod/node-app
+</code></pre></div></div>
+
+<p>Lets look at the first version of our deployment: <a href="/kubernetes/deployment/node-deploy-v1.yaml">node-deploy-v1.yaml</a></p>
+
+<p>And then deploy it with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl apply <span class="nt">-f</span> node-deploy-v1.yaml
+</code></pre></div></div>
+
+<p>let’s view the created deployment resource by running:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl get deployment/node-app-deployment
+<span class="c"># for more detail use describe instead of get</span>
+~<span class="nv">$ </span>kubectl describe deployment/node-app-deployment
+<span class="c"># and we can see the child resources by running:</span>
+~<span class="nv">$ </span>kubectl get replicaset
+~<span class="nv">$ </span>kubectl get pods
+</code></pre></div></div>
+
+<p>Now a <em>very</em> important update to the configuration. We need to specify a specific image version rather than defaulting to the latest image.</p>
+
+<p>See the difference on <a href="/kubernetes/deployment/node-deploy-v2.yaml#L19">line 19 of node-deploy-v2.yaml</a>]</p>
+
+<p>And <em>apply</em> it with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl apply <span class="nt">-f</span> node-deploy-v2.yaml
+</code></pre></div></div>
+
+<p>Take a look under the events section of <code class="language-plaintext highlighter-rouge">node-app-deployment</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl describe deployment/node-app-deployment
+Name:                   node-app-deployment
+Namespace:              default
+...
+Events:
+  Type    Reason             Age    From                   Message
+  <span class="nt">----</span>    <span class="nt">------</span>             <span class="nt">----</span>   <span class="nt">----</span>                   <span class="nt">-------</span>
+  Normal  ScalingReplicaSet  2m32s  deployment-controller  Scaled up replica <span class="nb">set </span>node-app-deployment-7b5bf5b8c7 to 1
+  Normal  ScalingReplicaSet  14s    deployment-controller  Scaled up replica <span class="nb">set </span>node-app-deployment-7d9b5b9c88 to 1
+  Normal  ScalingReplicaSet  12s    deployment-controller  Scaled down replica <span class="nb">set </span>node-app-deployment-7b5bf5b8c7 to 0
+</code></pre></div></div>
+
+<p>See that a new replica set was scaled up <strong>before</strong> the old replica set was scaled down.</p>
+
+<p>We can see the replica sets by doing:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl get replicaset
+~<span class="nv">$ </span>kubectl describe replicaset/<span class="si">$(</span>kubectl get replicaset <span class="nt">--no-headers</span><span class="o">=</span><span class="nb">true</span> | <span class="nb">head</span> <span class="nt">-n1</span> | <span class="nb">cut</span> <span class="nt">-d</span> <span class="s2">" "</span> <span class="nt">-f</span> 1<span class="si">)</span>
+~<span class="nv">$ </span>kubectl describe replicaset/<span class="si">$(</span>kubectl get replicaset <span class="nt">--no-headers</span><span class="o">=</span><span class="nb">true</span> | <span class="nb">tail</span> <span class="nt">-n1</span> | <span class="nb">cut</span> <span class="nt">-d</span> <span class="s2">" "</span> <span class="nt">-f</span> 1<span class="si">)</span>
+</code></pre></div></div>
+
+<p>Notice how the newer replica set has the <code class="language-plaintext highlighter-rouge">Created pod</code> message before the older replicaset has the <code class="language-plaintext highlighter-rouge">Deleted pod</code> message.</p>
+
+<p>But why isn’t the old replica set deleted as soon as the new one’s pod is alive? (<em>hint: roll back</em>)</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">codytrey.github.io</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">codytrey.github.io</li><li><a class="u-email" href="mailto:cody.t.belcher@gmail.com">cody.t.belcher@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>codytrey.github.io is an online brain dump for various tech knowledge</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

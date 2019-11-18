@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Setting up a Docker and K8s test machine | codytrey.github.io</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Setting up a Docker and K8s test machine" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<meta property="og:description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<link rel="canonical" href="http://localhost:4000/other/labmachine/" />
+<meta property="og:url" content="http://localhost:4000/other/labmachine/" />
+<meta property="og:site_name" content="codytrey.github.io" />
+<script type="application/ld+json">
+{"@type":"WebPage","headline":"Setting up a Docker and K8s test machine","url":"http://localhost:4000/other/labmachine/","description":"codytrey.github.io is an online brain dump for various tech knowledge","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="codytrey.github.io" /></head>
+<body><header class="site-header" role="banner">
+
+    <div class="wrapper"><a class="site-title" rel="author" href="/">codytrey.github.io</a>
+      </div>
+  </header>
+  <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <div class="post-content">
+    <h1 id="setting-up-the-lab-environment">Setting up the lab environment</h1>
+
+<p>(<em>for future replication</em>)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>OS</th>
+      <th>Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ubuntu</td>
+      <td>19.04</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="base-os-and-account-setup">Base OS and Account setup</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>adduser labuser
+<span class="nb">sudo </span>apt-get update
+<span class="nb">sudo </span>apt-get upgrade
+</code></pre></div></div>
+
+<h2 id="docker-setup">Docker setup</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>docker.io
+<span class="nb">cat</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh"> &gt;&gt; /etc/docker/daemon.json
+{
+"bip": "10.0.0.1/16",
+"insecure-registries" : ["localhost:32000"]
+}
+</span><span class="no">EOF
+</span><span class="nb">sudo </span>systemctl start docker
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>docker
+<span class="nb">sudo </span>usermod <span class="nt">-aG</span> docker cbelcher
+</code></pre></div></div>
+
+<h2 id="kubernetes-setup-using-microk8s">Kubernetes Setup (using microk8s)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>snap <span class="nb">install </span>microk8s <span class="nt">--classic</span>
+<span class="nb">sudo </span>usermod <span class="nt">-a</span> <span class="nt">-G</span> microk8s labuser
+microk8s.status <span class="nt">--wait-ready</span>
+<span class="nb">sudo </span>snap <span class="nb">alias </span>microk8s.kubectl kubectl
+microk8s.enable dns
+microk8s.enable metrics-server
+microk8s.enable storage
+microk8s.enable helm
+<span class="nb">sudo </span>snap <span class="nb">alias </span>microk8s.helm helm
+helm init
+</code></pre></div></div>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">codytrey.github.io</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">codytrey.github.io</li><li><a class="u-email" href="mailto:cody.t.belcher@gmail.com">cody.t.belcher@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>codytrey.github.io is an online brain dump for various tech knowledge</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

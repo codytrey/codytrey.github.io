@@ -1,8 +1,7 @@
 ---
-theme: jekyll-theme-slate
+layout: page
 title: Docker Hello World
-description: The very first Docker container you'll run
-permalink: /docker/hello-world
+permalink: /docker/hello-world/
 ---
 # Baby's first Container
 

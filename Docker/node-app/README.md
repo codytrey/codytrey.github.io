@@ -1,3 +1,8 @@
+---
+layout: page
+title: Building Custom Docker Image
+permalink: /docker/node-app/
+---
 # Building a custom container to run your Custom App
 
 In this example, we have a custom NodeJs app that we want to run in a container.

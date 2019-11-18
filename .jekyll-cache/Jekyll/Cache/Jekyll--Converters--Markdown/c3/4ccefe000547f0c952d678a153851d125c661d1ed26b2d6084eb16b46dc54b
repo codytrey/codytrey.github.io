@@ -1,0 +1,8 @@
+I"ò<h1 id="docker-training-exercises">Docker training exercises</h1>
+
+<ol>
+  <li><a href="./hello-world">Hello World</a></li>
+  <li><a href="./nginx">Nginx Web Server</a></li>
+  <li><a href="./node-app">Building Custom Containers</a></li>
+</ol>
+:ET

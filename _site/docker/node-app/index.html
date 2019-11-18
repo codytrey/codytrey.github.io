@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Building Custom Docker Image | codytrey.github.io</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Building Custom Docker Image" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<meta property="og:description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<link rel="canonical" href="http://localhost:4000/docker/node-app/" />
+<meta property="og:url" content="http://localhost:4000/docker/node-app/" />
+<meta property="og:site_name" content="codytrey.github.io" />
+<script type="application/ld+json">
+{"@type":"WebPage","headline":"Building Custom Docker Image","url":"http://localhost:4000/docker/node-app/","description":"codytrey.github.io is an online brain dump for various tech knowledge","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="codytrey.github.io" /></head>
+<body><header class="site-header" role="banner">
+
+    <div class="wrapper"><a class="site-title" rel="author" href="/">codytrey.github.io</a>
+      </div>
+  </header>
+  <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <div class="post-content">
+    <h1 id="building-a-custom-container-to-run-your-custom-app">Building a custom container to run your Custom App</h1>
+
+<p>In this example, we have a custom NodeJs app that we want to run in a container.</p>
+
+<p>To build our own container image, we need to write a Dockerfile.</p>
+
+<pre><code class="language-Dockerfile">FROM node:12
+
+ADD weather-app /weather-app
+
+WORKDIR /weather-app
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
+</code></pre>
+
+<p>Breaking down the above <code class="language-plaintext highlighter-rouge">Dockerfile</code></p>
+
+<ol>
+  <li>the <code class="language-plaintext highlighter-rouge">FROM</code> statement specifies a base image to use as a starting point</li>
+  <li>the <code class="language-plaintext highlighter-rouge">ADD</code> statement copies the directory <code class="language-plaintext highlighter-rouge">weather-app</code> from our current directory, into the container image</li>
+  <li>the <code class="language-plaintext highlighter-rouge">WORKDIR</code> statementsets the default working directory for all furture actions in the Dockerfile (and the default directory if gaining an interactive shell in the container)</li>
+  <li>the <code class="language-plaintext highlighter-rouge">RUN</code> statement defines a command to run in the container at build time</li>
+  <li>the <code class="language-plaintext highlighter-rouge">EXPOSE</code> statement configures port 3000 to be opened on this container</li>
+  <li>the <code class="language-plaintext highlighter-rouge">CMD</code> statement sets the default command that will run when the container starts</li>
+</ol>
+
+<p>To build this container, navigate to the <code class="language-plaintext highlighter-rouge">node-app</code> directory, and run:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>docker build <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>You will see when this command finishes that the container is given a Hash based ID. Since this isn’t human friendly, you can tag container image builds in a more user friendly way. (Ie. Semantic Versioning)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>docker build <span class="nt">-t</span> node-app:1.0.0 <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>To then run this container:</p>
+
+<p><strong>Note:</strong> To Run this follow the codeburst link in the <a href="#refs">Refs</a> section and use the instructions their to make an account and API Key on <a href="openweathermap.org">OpenWeatherMap.org</a></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>docker run <span class="nt">-e</span> <span class="nv">API_KEY</span><span class="o">=</span><span class="nv">$API_KEY</span> <span class="nt">-p</span> 3000:3000 <span class="nt">-d</span> node-app:1.0.0
+</code></pre></div></div>
+
+<h2 id="refs">Refs</h2>
+
+<ul>
+  <li><a href="https://docs.docker.com/engine/reference/builder/">https://docs.docker.com/engine/reference/builder/</a></li>
+  <li><a href="https://codeburst.io/build-a-weather-website-in-30-minutes-with-node-js-express-openweather-a317f904897b">https://codeburst.io/build-a-weather-website-in-30-minutes-with-node-js-express-openweather-a317f904897b</a></li>
+  <li>[https://hub.docker.com/<em>/node/](https://hub.docker.com/</em>/node/)</li>
+</ul>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">codytrey.github.io</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">codytrey.github.io</li><li><a class="u-email" href="mailto:cody.t.belcher@gmail.com">cody.t.belcher@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>codytrey.github.io is an online brain dump for various tech knowledge</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

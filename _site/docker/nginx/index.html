@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Docker Nginx Web Server | codytrey.github.io</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Docker Nginx Web Server" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<meta property="og:description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<link rel="canonical" href="http://localhost:4000/docker/nginx/" />
+<meta property="og:url" content="http://localhost:4000/docker/nginx/" />
+<meta property="og:site_name" content="codytrey.github.io" />
+<script type="application/ld+json">
+{"@type":"WebPage","headline":"Docker Nginx Web Server","url":"http://localhost:4000/docker/nginx/","description":"codytrey.github.io is an online brain dump for various tech knowledge","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="codytrey.github.io" /></head>
+<body><header class="site-header" role="banner">
+
+    <div class="wrapper"><a class="site-title" rel="author" href="/">codytrey.github.io</a>
+      </div>
+  </header>
+  <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <div class="post-content">
+    <h1 id="nginx-container---real-world-ish-example">Nginx Container - Real World (ish) Example</h1>
+
+<blockquote>
+  <p>“Cool story bro, anyone can do a hello world. But what about real world applications”</p>
+</blockquote>
+
+<p>First, make a directory named <code class="language-plaintext highlighter-rouge">www</code> in your current directory (ie: <code class="language-plaintext highlighter-rouge">mkdir www</code>) and then download <a href="/docker/nginx/www/index.html">index.html</a> and place it in that directory.</p>
+
+<p>Now, let’s run an Nginx web server, exposing port 8080 and mounting “$(pwd)/www” into the container as the web root</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    ~<span class="nv">$ </span>docker run <span class="nt">-p</span> 8080:80 <span class="nt">-v</span> <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/www:/usr/share/nginx/html:ro <span class="nt">-d</span> nginx
+</code></pre></div></div>
+
+<p>Now open a web browser, and go to: <code class="language-plaintext highlighter-rouge">http://&lt;yourhostname&gt;:8080/</code></p>
+
+<p>Previous: <a href="../hello-world">Hello World</a> Next: <a href="../node-app">Building Custom Containers</a></p>
+
+<h2 id="refs">Refs</h2>
+
+<ul>
+  <li>[https://hub.docker.com/<em>/nginx](https://hub.docker.com/</em>/nginx)</li>
+</ul>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">codytrey.github.io</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">codytrey.github.io</li><li><a class="u-email" href="mailto:cody.t.belcher@gmail.com">cody.t.belcher@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>codytrey.github.io is an online brain dump for various tech knowledge</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

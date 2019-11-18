@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Scaling Applications in k8s | codytrey.github.io</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Scaling Applications in k8s" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<meta property="og:description" content="codytrey.github.io is an online brain dump for various tech knowledge" />
+<link rel="canonical" href="http://localhost:4000/kubernetes/hpa/" />
+<meta property="og:url" content="http://localhost:4000/kubernetes/hpa/" />
+<meta property="og:site_name" content="codytrey.github.io" />
+<script type="application/ld+json">
+{"@type":"WebPage","headline":"Scaling Applications in k8s","url":"http://localhost:4000/kubernetes/hpa/","description":"codytrey.github.io is an online brain dump for various tech knowledge","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="codytrey.github.io" /></head>
+<body><header class="site-header" role="banner">
+
+    <div class="wrapper"><a class="site-title" rel="author" href="/">codytrey.github.io</a>
+      </div>
+  </header>
+  <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <div class="post-content">
+    <h1 id="scaling-applications-in-k8s">Scaling Applications in k8s</h1>
+
+<p>Times are good. Our app is deployed in k8s, exposed to users, and updates don’t impact avalibility. What more could anyone ask for?</p>
+
+<p>Well turns out you’re so good at your job, the app is getting 30 times the users this week than it was last week and performance is starting to suffer. How do we address this?</p>
+
+<p>Fortunately, k8s has built in scaling for pods that are deployed via deployment/replicaset and will even distribute the traffic if exposed via a k8s service.</p>
+
+<p>How do we scale? remember seeing the <code class="language-plaintext highlighter-rouge">replicas: 1</code> line in the deployment files from the previous section: <a href="/kubernetes/deployment/node-deploy-v2.yaml#L8">node-deploy-v2.yaml</a></p>
+
+<p>We <em>could</em> update that value and run the <code class="language-plaintext highlighter-rouge">kubectl apply</code> again, but there is a better way.</p>
+
+<p>We can tell k8s to scale the existing deployment by:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl get deployments
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+node-app-deployment   1/1     1            1           28m
+
+~<span class="nv">$ </span>kubectl scale <span class="nt">--replicas</span><span class="o">=</span>3 deployment/node-app-deployment
+deployment.apps/node-app-deployment scaled
+
+~<span class="nv">$ </span>kubectl get deployments
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+node-app-deployment   3/3     3            3           29m
+
+~<span class="nv">$ </span>kubectl get pods
+NAME                                   READY   STATUS        RESTARTS   AGE
+node-app-deployment-7d9b5b9c88-6wbgt   1/1     Running       0          86s
+node-app-deployment-7d9b5b9c88-cgx9b   1/1     Running       0          28m
+node-app-deployment-7d9b5b9c88-j6576   1/1     Running       0          86s
+</code></pre></div></div>
+
+<p>Notice how there are 2 new pods, and the existing pod remains, bringing the total to the desired 3.</p>
+
+<p>What do you think will happen if you are accessing the app, and delete one of the pods.</p>
+
+<p>Once you think you know, try it by running:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl delete <span class="nt">--force</span><span class="o">=</span><span class="nb">true</span> <span class="nt">--grace-period</span><span class="o">=</span>0 pod/<span class="si">$(</span>kubectl get pod <span class="nt">--no-headers</span><span class="o">=</span><span class="nb">true</span> | <span class="nb">shuf</span> | <span class="nb">head</span> <span class="nt">-n1</span> | <span class="nb">cut</span> <span class="nt">-d</span> <span class="s2">" "</span> <span class="nt">-f1</span><span class="si">)</span>
+</code></pre></div></div>
+
+<h2 id="autoscaling">Autoscaling</h2>
+
+<p>Scaling to a set number of pods is nice and easy, but what if the load is dynamic and you only want to scale out when needed? (ex: Large influx of traffic on a streaming site between 6:00 and 9:00 pm and on weekends, but 7:00 am to 4:00 pm on weekdays is usually very slow)</p>
+
+<p>Kubernetes provides a resource called <code class="language-plaintext highlighter-rouge">Horizontal Pod Autoscaler</code>, or <code class="language-plaintext highlighter-rouge">HPA</code>. What an <code class="language-plaintext highlighter-rouge">HPA</code> does is look at the requested CPU and/or Memory of a pod (or custom metric) and compare that to the actual usage.</p>
+
+<p>If the resource usage of a pod (or average of pods in replica set) exceeds the given threshold for longer than a set period of time, a scale up event is triggered.</p>
+
+<p>If the resource usage of a pod (or average of pods in replica set) goes far enough below the threshold for long enough, a scale down event is triggered.</p>
+
+<p>Notice that an HPA depends on us specifying how much CPU and/or Memory should requested by a pod.</p>
+
+<p>In the <a href="/kubernetes/hpa/node-deploy-v3.yaml#L28-34">node-deploy-v3.yaml</a> file, we have added CPU and memory requests and limits. (See the kubernetes documentation <a href="https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-types">here</a> for more information on setting resource requests and limits)</p>
+
+<p>We first need to apply this update by running:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl apply <span class="nt">-f</span> node-deploy-v3.yaml
+</code></pre></div></div>
+
+<p>Then we can add an HPA to the updated deployment by:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>kubectl autoscale deployment/node-app-deployment <span class="nt">--cpu-percent</span><span class="o">=</span>50 <span class="nt">--min</span><span class="o">=</span>1 <span class="nt">--max</span><span class="o">=</span>4
+
+~<span class="nv">$ </span>kubectl get hpa
+NAME                  REFERENCE                        TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+node-app-deployment   Deployment/node-app-deployment   0%/50%    1         4         1         5m
+</code></pre></div></div>
+
+<p>(<em>an artificial load can be generated to test the HPA by running a curl command in a loop</em>)</p>
+
+<p>An alternative way of creating an HPA is to define one in a yaml file (ie. declaratively) which is better for automated and reproducable deployments.</p>
+
+<p>Take a look at <a href="/kubernetes/hpa/node-app-hpa.yaml">node-app-hpa.yaml</a>, this this declarative equivalint to the imparative <code class="language-plaintext highlighter-rouge">kubeclt autoscale</code> command from before.</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">codytrey.github.io</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">codytrey.github.io</li><li><a class="u-email" href="mailto:cody.t.belcher@gmail.com">cody.t.belcher@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>codytrey.github.io is an online brain dump for various tech knowledge</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,3 +1,8 @@
+---
+layout: page
+title: Docker Nginx Web Server
+permalink: /docker/nginx/
+---
 # Nginx Container - Real World (ish) Example
 
 > "Cool story bro, anyone can do a hello world. But what about real world applications"
