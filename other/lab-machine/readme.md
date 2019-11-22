@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Setting up a Docker and K8s test machine
-permalink: /other/labmachine/
+permalink: /other/lab-machine/
 ---
 # Setting up the lab environment
 
