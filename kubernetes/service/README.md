@@ -1,3 +1,8 @@
+---
+layout: page
+title: Expose the previus pod via a k8s service
+permalink: /kubernetes/service/
+---
 # Expose the previus pod via a k8s service
 
 View the file [node-svc.yaml](./node-svc.yaml)

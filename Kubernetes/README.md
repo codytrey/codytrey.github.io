@@ -1,3 +1,8 @@
+---
+layout: page
+title: Kubernetes Introduction
+permalink: /kubernetes/
+---
 # Kubernetes Introduction
 
 ## Kubernetes Resources Intro

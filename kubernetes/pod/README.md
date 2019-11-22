@@ -1,3 +1,8 @@
+---
+layout: page
+title: Running a Pod in K8S
+permalink: /kubernetes/pod/
+---
 # Running a Pod in K8S
 
 first look at the [node_pod.yaml](./node_pod.yaml) file. It describes the pod that we wish to deploy into our k8s cluster.

@@ -1,3 +1,8 @@
+---
+layout: page
+title: Manage Kubernetes Deployments using Helm
+permalink: /kubernetes/helm
+---
 # Manage Kubernetes Deployments using Helm
 
 Now that you're familure with k8s concepts and resouces, you should learn about some tools that make it easier to manage deploying applications into k8s in a repeatable manner.

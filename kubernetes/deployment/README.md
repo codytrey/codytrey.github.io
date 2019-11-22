@@ -1,3 +1,8 @@
+---
+layout: page
+title: Using k8s Deployments
+permalink: /kubernetes/deployment/
+---
 # Using k8s Deployments
 
 Great, the App is running and exposed. Time to call it a day right?

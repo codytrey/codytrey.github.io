@@ -1,3 +1,8 @@
+---
+layout: page
+title: Scaling Applications in k8s
+permalink: /kubernetes/hpa/
+---
 # Scaling Applications in k8s
 
 Times are good. Our app is deployed in k8s, exposed to users, and updates don't impact avalibility. What more could anyone ask for?
