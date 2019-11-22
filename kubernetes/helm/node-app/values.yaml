@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: clm-aus-tglqp4:4567/cbelcher/container_training
-  tag: v1.0.0
+  repository: docker.pkg.github.com/codytrey/codytrey.github.io/node-app
+  tag: v0.1.0
   pullPolicy: IfNotPresent
 
 nameOverride: ""

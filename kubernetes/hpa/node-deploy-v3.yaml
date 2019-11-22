@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: clm-aus-tglqp4:4567/cbelcher/container_training:v1.0.0
+          image: docker.pkg.github.com/codytrey/codytrey.github.io/node-app:v0.1.0
           ports:
           - containerPort: 3000
           env:
